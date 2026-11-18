@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pengisi Template PK-288</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600&family=Londrina+Solid&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <section class="panel">
+    <h1>Pengisi Template PK-288</h1>
+    <p class="sub">Isi form, pratinjau langsung di sebelah, lalu unduh PNG 1080×1440.</p>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div id="form"></div>
+    <div class="act">
+      <button id="dl1">Unduh halaman ini (PNG)</button>
+      <button id="dlAll" class="alt">Unduh semua halaman</button>
+    </div>
+    <p class="note">Teks otomatis mengecil kalau kepanjangan. Foto diproses di browser kamu dan tidak diunggah ke mana pun.</p>
+  </section>
+  <section class="view"><div id="out"><div id="page"></div></div></section>
+</div>
+<script src="html2canvas.min.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const loadJS=src=>window.heic2any?Promise.resolve():new Promise((ok,no)=>{const e=document.createElement('script');e.src=src;e.onload=ok;e.onerror=no;document.head.append(e)});
+const esc=t=>(t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const D='#fbf1de',L='#7a1c22';
+/* x1,y1,x2,y2 = area kotak isi pada PNG */
+const PAGES=[
+ {t:'Twibbon',k:'tw',img:'p1.png'},
+ {t:'Potensi diri',k:'ps',img:'p2.png',col:D,boxes:[['Personal Strengths','a',66,412,531,765],['Academic Expertise','b',571,405,1025,760],['Meaningful Experiences','c',56,862,531,1215],['Areas for Development','d',555,858,1025,1210]]},
+ {t:'Study plan',k:'sp',img:'p3.png',col:L,boxes:[['1-2 Semester','a',69,316,502,697],['3-4 Semester','b',558,372,992,754],['5-6 Semester','c',69,838,502,1219],['7-8 Semester','d',560,879,994,1260]]},
+ {t:'Life grand map',k:'lm',img:'p4.png',col:D,boxes:[['2026-2031','a',51,347,483,630],['2031-2036','b',626,480,1046,756],['2036-2041','c',46,772,484,1060],['2041-Beyond','d',626,923,1059,1209]]},
+ {t:'Community & goals',k:'cg',img:'p5.png',col:L,boxes:[['Community Services','a',74,407,1003,680],['Grand Goals Plan','b',74,795,1003,1053]]},
+ {t:'Sampul',k:'cv',img:'p6.png',boxes:[]}];
+const S={p:0,t:{},name:'',bidang:'',univ:'',photo:null,zoom:1,ox:0,oy:0};
+try{Object.assign(S,JSON.parse(localStorage.getItem('pk288')||'{}'));S.photo=null}catch(e){}
+const save=()=>{try{localStorage.setItem('pk288',JSON.stringify({...S,photo:null}))}catch(e){}};
+
+function pageHTML(p){
+  const bg=`<img class="bg" alt="" src="assets/${p.img}">`;
+  if(p.k==='tw'){
+    const img=S.photo?`<img alt="" src="${S.photo}" style="transform:translate(${S.ox}%,${S.oy}%) scale(${S.zoom})">`:'';
+    return `<div class="ph">${img}</div>${bg}<div class="pl"><div class="nm fit" data-fs="46">${esc((S.name||'NAMA LENGKAP').toUpperCase())}</div><div class="ln fit" data-fs="25">${esc(S.bidang||'Bidang Pendidikan')}</div><div class="ln fit" data-fs="25">${esc(S.univ||'Universitas')}</div></div>`;
+  }
+  const bx=p.boxes.map(([l,k,x1,y1,x2,y2])=>`<div class="bx" style="left:${x1}px;top:${y1}px;width:${x2-x1}px;height:${y2-y1}px;color:${p.col}">${esc(S.t[p.k+k])}</div>`).join('');
+  return bg+bx;
+}
+function fit(){
+  document.querySelectorAll('#page .bx').forEach(e=>{let f=30;e.style.fontSize=f+'px';while(e.scrollHeight>e.clientHeight+1&&f>13){f--;e.style.fontSize=f+'px'}});
+  document.querySelectorAll('#page .fit').forEach(e=>{let f=+e.dataset.fs;e.style.fontSize=f+'px';while(e.scrollWidth>e.clientWidth+1&&f>14){f--;e.style.fontSize=f+'px'}});
+}
+function scale(){
+  const o=$('#out'),w=o.parentElement.clientWidth,s=Math.min(w/1080,Math.max(.3,(innerHeight-60)/1440));
+  o.style.width=1080*s+'px';o.style.height=1440*s+'px';$('#page').style.transform=`scale(${s})`;
+}
+function render(){$('#page').innerHTML=pageHTML(PAGES[S.p]);fit()}
+function tabs(){
+  $('#tabs').innerHTML=PAGES.map((p,i)=>`<button role="tab" data-i="${i}" aria-current="${i===S.p}">${i+1}. ${p.t}</button>`).join('');
+  document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{S.p=+b.dataset.i;save();tabs();form();render()});
+}
+function form(){
+  const p=PAGES[S.p],f=$('#form');
+  if(p.k==='tw'){
+    f.innerHTML=`<label for="ph">Foto kamu</label><input type="file" id="ph" accept="image/*,.heic,.heif"><p class="note" id="st" role="status"></p>
+    <label for="zm">Zoom</label><input type="range" id="zm" min="1" max="3" step="0.05" value="${S.zoom}">
+    <label for="ox">Geser kiri-kanan</label><input type="range" id="ox" min="-40" max="40" step="1" value="${S.ox}">
+    <label for="oy">Geser atas-bawah</label><input type="range" id="oy" min="-40" max="40" step="1" value="${S.oy}">
+    <label for="nm">Nama lengkap</label><input type="text" id="nm" value="${esc(S.name)}" autocomplete="off">
+    <label for="bd">Bidang pendidikan</label><input type="text" id="bd" value="${esc(S.bidang)}" autocomplete="off">
+    <label for="un">Universitas</label><input type="text" id="un" value="${esc(S.univ)}" autocomplete="off">`;
+    $('#ph').onchange=async e=>{
+      const f=e.target.files[0],st=$('#st');if(!f)return;
+      try{
+        let b=f;
+        if(/hei[cf]/i.test(f.type)||/\.hei[cf]$/i.test(f.name)){
+          st.textContent='Mengubah HEIC ke JPG...';
+          await loadJS('heic2any.min.js');
+          const r=await heic2any({blob:f,toType:'image/jpeg',quality:.92});b=Array.isArray(r)?r[0]:r;
+        }
+        const url=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(b)});
+        const im=new Image();im.src=url;await im.decode();
+        S.photo=url;st.textContent='';render();
+      }catch(err){st.textContent='Foto tidak bisa dibaca. Simpan sebagai JPG atau PNG, lalu coba lagi.'}
+    };
+    [['zm','zoom'],['ox','ox'],['oy','oy']].forEach(([id,k])=>$('#'+id).oninput=e=>{S[k]=+e.target.value;save();render()});
+    [['nm','name'],['bd','bidang'],['un','univ']].forEach(([id,k])=>$('#'+id).oninput=e=>{S[k]=e.target.value;save();render()});
+  }else if(!p.boxes.length){
+    f.innerHTML='<p class="note">Halaman sampul tidak perlu diisi. Tetap ikut terunduh di "Unduh semua halaman".</p>';
+  }else{
+    f.innerHTML=p.boxes.map(([l,k])=>`<label for="f_${p.k}${k}">${l}</label><textarea id="f_${p.k}${k}" data-k="${p.k}${k}">${esc(S.t[p.k+k])}</textarea>`).join('');
+    f.querySelectorAll('textarea').forEach(t=>t.oninput=()=>{S.t[t.dataset.k]=t.value;save();render()});
+  }
+}
+async function shot(i){
+  const keep=S.p;S.p=i;render();await document.fonts.ready;fit();
+  await Promise.all([...document.querySelectorAll('#page img')].map(im=>im.complete?1:new Promise(r=>im.onload=r)));
+  const c=await html2canvas($('#page'),{scale:1,backgroundColor:null,useCORS:true,onclone:d=>{
+    const e=d.getElementById('page');e.style.transform='none';e.parentElement.style.cssText='width:1080px;height:1440px;overflow:visible'}});
+  const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download=`pk288-${i+1}-${PAGES[i].k}.png`;a.click();
+  S.p=keep;render();
+}
+async function run(fn){const b=[$('#dl1'),$('#dlAll')];b.forEach(x=>x.disabled=true);try{await fn()}catch(e){alert('Gagal mengunduh. Buka lewat alamat Vercel (https), bukan langsung dari file.')}b.forEach(x=>x.disabled=false)}
+$('#dl1').onclick=()=>run(()=>shot(S.p));
+$('#dlAll').onclick=()=>run(async()=>{for(let i=0;i<PAGES.length;i++){await shot(i);await new Promise(r=>setTimeout(r,400))}});
+addEventListener('resize',scale);
+tabs();form();render();scale();
+document.fonts.ready.then(()=>{render();scale()});
+</script>
+</body>
+</html>
