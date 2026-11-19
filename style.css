@@ -1,16 +1,10 @@
-/*
-  Font:
-  - Nama dan judul : Quotes Caps (font komersial Sudtipos, tidak disertakan di repo ini).
-    Dipakai dari font yang terpasang di komputer pengguna lewat local().
-    Kalau tidak ada, otomatis jatuh ke Londrina Solid.
-  - Selain itu     : Bricolage Grotesque (Google Fonts).
-*/
+/* Font: nama & judul = Londrina Solid, lainnya = Bricolage Grotesque (keduanya dari Google Fonts, hasil sama di semua komputer) */
+:root{--f-title:'Londrina Solid',sans-serif;--w-title:900;--f-body:'Bricolage Grotesque',system-ui,sans-serif}
 @font-face{
   font-family:'Quotes Caps';
   font-weight:400;
   src:local('Quotes Caps'),local('Quotes Caps Regular'),local('QuotesCaps-Regular'),local('Quotes-Caps');
 }
-:root{--f-title:'Quotes Caps','Londrina Solid',sans-serif;--f-body:'Bricolage Grotesque',system-ui,sans-serif}
 :root{--bg:#f6efe4;--panel:#fffaf1;--ink:#3b1114;--line:#d9c7a5;--acc:#7a1c22;--on:#fff;color-scheme:light}
 @media (prefers-color-scheme:dark){:root{--bg:#1a0e0f;--panel:#261516;--ink:#f3e6d3;--line:#4a2d2e;--acc:#e0b04a;--on:#1a0e0f;color-scheme:dark}}
 *{box-sizing:border-box}
@@ -18,7 +12,7 @@ button,input,textarea{font-family:var(--f-body)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body)}
 .app{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:24px;padding:20px;max-width:1300px;margin:auto}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;align-self:start}
-h1{font-family:var(--f-title);font-weight:400;font-size:28px;line-height:1.1;letter-spacing:.5px;margin:0 0 4px;color:var(--acc)}
+h1{font-family:var(--f-title);font-weight:var(--w-title);font-size:28px;line-height:1.1;letter-spacing:.5px;margin:0 0 4px;color:var(--acc)}
 .sub{margin:0 0 14px;font-size:14px;opacity:.8}
 .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 .tabs button{font:inherit;font-size:13px;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
@@ -40,9 +34,21 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 #page{position:relative;width:1080px;height:1440px;overflow:hidden;transform-origin:0 0;background:#fff}
 #page>img.bg{position:absolute;inset:0;width:1080px;height:1440px;z-index:2}
 .ph{position:absolute;left:144px;top:246px;width:788px;height:1060px;overflow:hidden;background:linear-gradient(#bfe6fb,#eaf7fd)}
-.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph img{position:absolute;max-width:none;display:block}
 .bx{position:absolute;z-index:3;padding:22px 26px;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.35}
 .pl{position:absolute;z-index:3;left:42px;top:1008px;width:470px;color:#7a1c22}
 .pl div{white-space:nowrap;overflow:hidden;font-family:var(--f-body)}
+.pl.dd{left:32px;top:958px;width:548px}
 .pl div.nm{font-family:var(--f-title);font-weight:400;line-height:1.1}
 .pl .ln{line-height:1.2}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{font:inherit;font-size:14px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.cnt{font-weight:400;opacity:.7;float:right;font-size:12.5px}
+.cnt.full{color:#d9534f;opacity:1;font-weight:600}
+.cfg{font:inherit;font-size:13px;padding:6px 12px;margin:0 0 12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:22px;max-width:420px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog h2{font-family:var(--f-title);font-weight:400;font-size:26px;margin:0 0 4px;color:var(--acc)}
+dialog .ok{font:inherit;font-weight:600;margin-top:18px;width:100%;padding:11px;border-radius:10px;border:0;background:var(--acc);color:var(--on);cursor:pointer}
+dialog .ok:disabled{opacity:.45;cursor:not-allowed}
