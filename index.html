@@ -1,34 +1,56 @@
 <!doctype html>
 <html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Twibbon PK-288</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600&family=Londrina+Solid:wght@900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600&family=Londrina+Solid&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/manggala.webp" />
-  <!-- Opsional: untuk perangkat Apple / iOS -->
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/manggala.webp" />
-</head>
-<body>
-<div class="app">
-  <section class="panel">
-    <h1>Pengisi Template PK-288</h1>
-    <button type="button" id="cfg" class="cfg">Ubah Jumlah semester / program</button>
-    <div class="tabs" id="tabs" role="tablist"></div>
-    <div id="form"></div>
-    <div class="act">
-      <button id="dl1">Unduh halaman ini (PNG)</button>
-      <button id="dlAll" class="alt">Unduh semua halaman</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Twibbon PK-288</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600&family=Londrina+Solid:wght@900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600&family=Londrina+Solid&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="assets/manggala.webp"
+    />
+    <!-- Opsional: untuk perangkat Apple / iOS -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/manggala.webp" />
+  </head>
+  <body>
+    <div class="app">
+      <section class="panel">
+        <h1>Pengisi Template PK-288</h1>
+        <button type="button" id="cfg" class="cfg">
+          Ubah Jumlah semester / program
+        </button>
+        <div id="degBox"></div>
+        <div class="tabs" id="tabs" role="tablist"></div>
+        <div id="form"></div>
+        <div class="act">
+          <button id="dl1">Unduh halaman ini (PNG)</button>
+          <button id="dlAll" class="alt">Unduh semua halaman</button>
+        </div>
+        <p class="note">
+          Foto diproses di browser kamu dan tidak diunggah ke mana pun.
+        </p>
+      </section>
+      <section class="view">
+        <div id="out"><div id="page"></div></div>
+      </section>
     </div>
-    <p class="note">Foto diproses di browser kamu dan tidak diunggah ke mana pun.</p>
-  </section>
-  <section class="view"><div id="out"><div id="page"></div></div></section>
-</div>
-<script src="html2canvas.min.js"></script>
-<dialog id="dlg"><h2>Mulai dari sini</h2><div id="dlgBody"></div><button type="button" id="dlgOk" class="ok">Mulai</button></dialog>
-<script src="app.js"></script>
-</body>
+    <script src="html2canvas.min.js"></script>
+    <dialog id="dlg">
+      <h2>Mulai dari sini</h2>
+      <div id="dlgBody"></div>
+      <button type="button" id="dlgOk" class="ok">Mulai</button>
+    </dialog>
+    <script src="app.js"></script>
+  </body>
 </html>

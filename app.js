@@ -2,9 +2,15 @@ const $=s=>document.querySelector(s);
 const esc=t=>(t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const loadJS=src=>window.heic2any?Promise.resolve():new Promise((ok,no)=>{const e=document.createElement('script');e.src=src;e.onload=ok;e.onerror=no;document.head.append(e)});
 
-/* ===== BATAS UKURAN FONT (px) =====
-   Teks otomatis mengecil sampai batas MIN, setelah itu input dihentikan.
-   Naikkan MIN kalau mau teks lebih besar (muatan jadi lebih sedikit), turunkan kalau mau muat lebih banyak. */
+/* ===== MODE BATAS TEKS =====
+   LIMIT_ON=false : input bebas, makin banyak isinya makin kecil hurufnya, sampai ukuran FLOOR.
+   LIMIT_ON=true  : input dihentikan saat huruf sudah mencapai batas MIN di bawah. */
+const LIMIT_ON=false;
+const FLOOR=14;                       // huruf terkecil saat LIMIT_ON=false (naikkan kalau mau lebih terbaca)
+const minOf=m=>LIMIT_ON?m:Math.min(m,FLOOR);
+const lim=(t,f)=>LIMIT_ON?limit(t,f):t;
+
+/* ===== UKURAN FONT (px) ===== */
 const MAX_BOX=30, MIN_BOX=24;   // isi kotak
 const MIN_NAME=34;              // nama
 const W_SINGLE=470, W_DOUBLE=548;   // lebar area teks di plat nama
@@ -12,7 +18,7 @@ const W_SINGLE=470, W_DOUBLE=548;   // lebar area teks di plat nama
 /* Satu gelar: bidang pendidikan sampai 2 baris.
    Double degree: 1 kalimat lengkap, maksimal 3 baris. */
 const FIELD={fs:22,min:18}, UNIV={fs:22,min:18};
-const DD={name:40,minName:30,text:{fs:26,min:18}};
+const DD={name:40,minName:30,text:{fs:22,min:18}};
 
 const D='#fbf1de',L='#7a1c22';
 const SEM={
@@ -28,11 +34,12 @@ const PAGES=[
  {t:'Life grand map',k:'lm',img:'p4.png',col:D,boxes:[['2026-2031','a',51,347,483,630],['2031-2036','b',626,480,1046,756],['2036-2041','c',46,772,484,1060],['2041-Beyond','d',626,923,1059,1209]]},
  {t:'Community & goals',k:'cg',img:'p5.png',col:L,boxes:[['Community Services','a',74,407,1003,680],['Grand Goals Plan','b',74,795,1003,1053]]},
  {t:'Sampul',k:'cv',img:'p6.png',boxes:[]}];
-const S={p:0,sem:null,deg:1,t:{},name:'',j1:'',u1:'',j2:'',u2:'',dd:'',photo:null,zoom:1,ox:0,oy:0};
+const S={p:0,sem:null,deg:1,ready:false,t:{},name:'',j1:'',u1:'',j2:'',u2:'',dd:'',photo:null,zoom:1,ox:0,oy:0};
 try{Object.assign(S,JSON.parse(localStorage.getItem('pk288')||'{}'));S.photo=null}catch(e){}
 if(S.bidang&&!S.j1){S.j1=S.bidang;S.u1=S.univ||''}
 /* data double degree lama (j1/j2/u1/u2) digabung jadi satu kalimat */
 if(!S.dd&&(S.j2||S.u2))S.dd=`Double Degree ${S.j1||'Jurusan 1'} dan ${S.j2||'Jurusan 2'} ${S.u1||'Universitas 1'} dan ${S.u2||'Universitas 2'}`;
+if(S.sem)S.ready=true;   // pengguna lama dianggap sudah memilih
 const save=()=>{try{localStorage.setItem('pk288',JSON.stringify({...S,photo:null}))}catch(e){}};
 const WIN={1:[153,228,793,1078],2:[148,246,784,1060]};   // [left, top, lebar, tinggi] jendela foto: 1 = satu gelar, 2 = double degree
 function photoCss(){
@@ -72,11 +79,11 @@ function pageHTML(p0){
   return bg+p.boxes.map(([l,k,x1,y1,x2,y2])=>`<div class="bx" style="left:${x1}px;top:${y1}px;width:${x2-x1}px;height:${y2-y1}px;color:${p.col}">${esc(S.t[p.k+k])}</div>`).join('');
 }
 function fit(){
-  document.querySelectorAll('#page .bx').forEach(e=>{let f=MAX_BOX;e.style.fontSize=f+'px';while(e.scrollHeight>e.clientHeight+1&&f>MIN_BOX){f--;e.style.fontSize=f+'px'}});
+  document.querySelectorAll('#page .bx').forEach(e=>{let f=MAX_BOX;e.style.fontSize=f+'px';while(e.scrollHeight>e.clientHeight+1&&f>minOf(MIN_BOX)){f--;e.style.fontSize=f+'px'}});
   document.querySelectorAll('#page .fit').forEach(e=>{
     let f=+e.dataset.fs;e.style.fontSize=f+'px';
     const wrapped=e.classList.contains('wrap')||e.classList.contains('wrap3');
-    while((wrapped?e.scrollHeight>e.clientHeight+1:e.scrollWidth>e.clientWidth+1)&&f>+e.dataset.min){f--;e.style.fontSize=f+'px'}
+    while((wrapped?e.scrollHeight>e.clientHeight+1:e.scrollWidth>e.clientWidth+1)&&f>minOf(+e.dataset.min)){f--;e.style.fontSize=f+'px'}
   });
   /* kalau total tinggi plat masih kelebihan, kecilkan semua teks bersamaan */
   const pl=$('#page .pl');
@@ -86,7 +93,7 @@ function fit(){
       let ok=false;
       pl.querySelectorAll('.fit').forEach(e=>{
         const f=parseFloat(e.style.fontSize)||+e.dataset.fs;
-        if(f>+e.dataset.min){e.style.fontSize=(f-1)+'px';ok=true}
+        if(f>minOf(+e.dataset.min)){e.style.fontSize=(f-1)+'px';ok=true}
       });
       if(!ok)break;
     }
@@ -101,17 +108,20 @@ function tabs(){
   $('#tabs').innerHTML=PAGES.map((p,i)=>`<button role="tab" data-i="${i}" aria-current="${i===S.p}">${i+1}. ${p.t}</button>`).join('');
   document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{S.p=+b.dataset.i;save();tabs();form();render()});
 }
-/* kolom teks dengan batas otomatis */
+/* kolom teks (dengan batas otomatis hanya jika LIMIT_ON=true) */
 function bindLimited(el,fits,get,set,cnt,capN){
-  const show=()=>{cnt.textContent=`${el.value.length} / ±${capN} karakter`};show();
-  el.oninput=()=>{const v=limit(el.value,fits);if(v!==el.value){el.value=v;cnt.classList.add('full');setTimeout(()=>cnt.classList.remove('full'),700)}set(v);show();save();render()};
+  const show=()=>{cnt.textContent=LIMIT_ON?`${el.value.length} / ±${capN} karakter`:`${el.value.length} karakter`};show();
+  el.oninput=()=>{const v=lim(el.value,fits);if(v!==el.value){el.value=v;cnt.classList.add('full');setTimeout(()=>cnt.classList.remove('full'),700)}set(v);show();save();render()};
 }
+/* pilihan gelar: tampil di atas tab */
+function degBox(){const b=$('#degBox');if(b)b.innerHTML=DEGCH(S.ready?S.deg:null)}
 function form(){
+  degBox();
   const p=cur(PAGES[S.p]),f=$('#form');
   if(p.k==='tw'){
     const dd=S.deg===2,w=dd?W_DOUBLE:W_SINGLE;
     const fl=dd?[['dd','Double degree']]:[['j1','Bidang pendidikan'],['u1','Universitas']];
-    f.innerHTML=DEGCH(S.deg)+`<label for="ph">Foto kamu</label><input type="file" id="ph" accept="image/*,.heic,.heif"><p class="note" id="st" role="status"></p>
+    f.innerHTML=`<label for="ph">Foto kamu</label><input type="file" id="ph" accept="image/*,.heic,.heif"><p class="note" id="st" role="status"></p>
     <label for="zm">Zoom</label><input type="range" id="zm" min="1" max="3" step="0.05" value="${S.zoom}">
     <label for="ox">Geser kiri-kanan</label><input type="range" id="ox" min="-1" max="1" step="0.01" value="${S.ox}">
     <label for="oy">Geser atas-bawah</label><input type="range" id="oy" min="-1" max="1" step="0.01" value="${S.oy}">
@@ -134,38 +144,41 @@ function form(){
     };
     [['zm','zoom'],['ox','ox'],['oy','oy']].forEach(([id,k])=>$('#'+id).oninput=e=>{S[k]=+e.target.value;save();render()});
     const nf=fitsLine(w,dd?DD.minName:MIN_NAME,true);
-    S.name=limit(S.name||'',nf);$('#f_name').value=S.name;
+    S.name=lim(S.name||'',nf);$('#f_name').value=S.name;
     bindLimited($('#f_name'),nf,0,v=>S.name=v,$('#c_name'),cap(nf));
     fl.forEach(([k])=>{
       const j=k[0]==='j';
       const lf=dd?fitsWrap(w,DD.text.min,'wrap3'):j?fitsWrap(w,FIELD.min):fitsLine(w,UNIV.min,false);
-      S[k]=limit(S[k]||'',lf);$('#f_'+k).value=S[k];
+      S[k]=lim(S[k]||'',lf);$('#f_'+k).value=S[k];
       bindLimited($('#f_'+k),lf,0,v=>S[k]=v,$('#c_'+k),cap(lf));
     });
+  }else if(p.k==='sp'&&!S.sem){
+    f.innerHTML=SEMCH(null)+'<p class="note">Pilih jumlah semester dulu, kolom isiannya akan muncul sesuai pilihan.</p>';
   }else if(!p.boxes.length){
     f.innerHTML='<p class="note">Halaman sampul tidak perlu diisi. Tetap ikut terunduh di "Unduh semua halaman".</p>';
   }else{
     f.innerHTML=(p.k==='sp'?SEMCH(S.sem||8):'')+p.boxes.map(([l,k])=>`<label for="f_${p.k}${k}">${l} <small class="cnt" id="c_${p.k}${k}"></small></label><textarea id="f_${p.k}${k}"></textarea>`).join('');
     p.boxes.forEach(([l,k,x1,y1,x2,y2])=>{
       const key=p.k+k,el=$('#f_'+key),fb=fitsBox(x2-x1,y2-y1);
-      el.value=limit(S.t[key]||'',fb);S.t[key]=el.value;
+      el.value=lim(S.t[key]||'',fb);S.t[key]=el.value;
       bindLimited(el,fb,0,v=>S.t[key]=v,$('#c_'+key),cap(fb));
     });
   }
 }
-/* ===== pengaturan awal: jumlah semester & gelar ===== */
+/* ===== dialog awal: pilih gelar dulu (jumlah semester dipilih di tab Study plan) ===== */
 const dlg=$('#dlg');
 if(!dlg.showModal)dlg.showModal=function(){this.setAttribute('open','')};
 if(!dlg.close)dlg.close=function(){this.removeAttribute('open')};
-function dlgBody(){$('#dlgBody').innerHTML=SEMCH(S.sem)+DEGCH(S.deg);$('#dlgOk').disabled=!S.sem}
+function dlgBody(){$('#dlgBody').innerHTML='<p class="note">Pilih gelar dulu. Jumlah semester dipilih nanti di tab Study plan.</p>'+DEGCH(S.ready?S.deg:null);$('#dlgOk').disabled=!S.ready}
 function openCfg(){dlgBody();dlg.showModal()}
 document.addEventListener('click',e=>{
   const b=e.target.closest('.chips button');if(!b)return;
-  const n=b.parentElement.dataset.n;S[n]=+b.dataset.v;save();
+  const n=b.parentElement.dataset.n;S[n]=+b.dataset.v;if(n==='deg')S.ready=true;save();
   if(dlg.hasAttribute('open'))dlgBody();else{form();render()}
 });
 $('#dlgOk').onclick=()=>{dlg.close();form();render()};
-dlg.addEventListener('cancel',e=>{if(!S.sem)e.preventDefault()});
+dlg.addEventListener('cancel',e=>{if(!S.ready)e.preventDefault()});
+dlg.addEventListener('close',()=>{form();render()});
 $('#cfg').onclick=openCfg;
 
 async function shot(i){
@@ -177,9 +190,10 @@ async function shot(i){
   S.p=keep;render();
 }
 async function run(fn){const b=[$('#dl1'),$('#dlAll')];b.forEach(x=>x.disabled=true);try{await fn()}catch(e){alert('Gagal mengunduh. Buka lewat alamat Vercel (https), bukan langsung dari file.')}b.forEach(x=>x.disabled=false)}
-$('#dl1').onclick=()=>run(()=>shot(S.p));
-$('#dlAll').onclick=()=>run(async()=>{for(let i=0;i<PAGES.length;i++){await shot(i);await new Promise(r=>setTimeout(r,400))}});
+const needSem=all=>((all||PAGES[S.p].k==='sp')&&!S.sem)?(alert('Pilih jumlah semester dulu di tab Study plan.'),true):false;
+$('#dl1').onclick=()=>{if(!needSem(false))run(()=>shot(S.p))};
+$('#dlAll').onclick=()=>{if(needSem(true))return;run(async()=>{for(let i=0;i<PAGES.length;i++){await shot(i);await new Promise(r=>setTimeout(r,400))}})};
 addEventListener('resize',scale);
 tabs();form();render();scale();
 document.fonts.ready.then(()=>{form();render();scale()});
-if(!S.sem)openCfg();
+if(!S.ready)openCfg();
