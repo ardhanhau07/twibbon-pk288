@@ -11,7 +11,7 @@ const W_SINGLE=470, W_DOUBLE=548;   // lebar area teks di plat nama
 
 /* Satu gelar: bidang pendidikan sampai 2 baris.
    Double degree: 1 kalimat lengkap, maksimal 3 baris. */
-const FIELD={fs:24,min:18}, UNIV={fs:24,min:18};
+const FIELD={fs:22,min:18}, UNIV={fs:22,min:18};
 const DD={name:40,minName:30,text:{fs:26,min:18}};
 
 const D='#fbf1de',L='#7a1c22';
