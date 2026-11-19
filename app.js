@@ -29,7 +29,7 @@ const SEM={
  4:{img:'p3_4.png',lab:['Semester 1','Semester 2','Semester 3','Semester 4'],b:[[70,317,502,697],[559,374,991,754],[70,839,502,1219],[561,880,993,1260]]},
  6:{img:'p3_6.png',lab:['Semester 1-2','Semester 3-4','Semester 5-6'],b:[[70,317,502,697],[559,363,991,743],[340,847,772,1227]]},
  8:{img:'p3.png',lab:['Semester 1-2','Semester 3-4','Semester 5-6','Semester 7-8'],b:[[69,316,502,697],[558,372,992,754],[69,838,502,1219],[560,879,994,1260]]},
- spesialis:{img:'p3_spesialis.png',lab:['Semester 1','Semester 2','Semester 3','Semester 4'],b:[[70,306,1004,458],[70,540,1004,694],[70,774,1004,926],[70,1028,1004,1180]]}};
+ spesialis:{img:'p3_spesialis.png',lab:['1st Year','2nd Year','3rd Year','End Goal'],b:[[70,306,1004,458],[70,540,1004,694],[70,774,1004,926],[70,1028,1004,1180]]}};
 const LM={2026:{img:'p4.png',lab:['2026-2031','2031-2036','2036-2041','2041-Beyond']},
  2027:{img:'p4_2027.png',lab:['2027-2032','2032-2037','2037-2042','2042-Beyond']}};
 const PAGES=[
