@@ -7,9 +7,12 @@ const loadJS=src=>window.heic2any?Promise.resolve():new Promise((ok,no)=>{const 
    Naikkan MIN kalau mau teks lebih besar (muatan jadi lebih sedikit), turunkan kalau mau muat lebih banyak. */
 const MAX_BOX=30, MIN_BOX=24;   // isi kotak
 const MIN_NAME=34;              // nama
-const MIN_LINE=22;              // jurusan / universitas
-const DD={name:40,line:21,minName:30,minLine:18};   // ukuran font khusus double degree
 const W_SINGLE=470, W_DOUBLE=548;   // lebar area teks di plat nama
+
+/* Satu gelar: bidang pendidikan sampai 2 baris.
+   Double degree: 1 kalimat lengkap, maksimal 3 baris. */
+const FIELD={fs:26,min:18}, UNIV={fs:26,min:18};
+const DD={name:40,minName:30,text:{fs:26,min:18}};
 
 const D='#fbf1de',L='#7a1c22';
 const SEM={
@@ -25,9 +28,11 @@ const PAGES=[
  {t:'Life grand map',k:'lm',img:'p4.png',col:D,boxes:[['2026-2031','a',51,347,483,630],['2031-2036','b',626,480,1046,756],['2036-2041','c',46,772,484,1060],['2041-Beyond','d',626,923,1059,1209]]},
  {t:'Community & goals',k:'cg',img:'p5.png',col:L,boxes:[['Community Services','a',74,407,1003,680],['Grand Goals Plan','b',74,795,1003,1053]]},
  {t:'Sampul',k:'cv',img:'p6.png',boxes:[]}];
-const S={p:0,sem:null,deg:1,t:{},name:'',j1:'',u1:'',j2:'',u2:'',photo:null,zoom:1,ox:0,oy:0};
+const S={p:0,sem:null,deg:1,t:{},name:'',j1:'',u1:'',j2:'',u2:'',dd:'',photo:null,zoom:1,ox:0,oy:0};
 try{Object.assign(S,JSON.parse(localStorage.getItem('pk288')||'{}'));S.photo=null}catch(e){}
 if(S.bidang&&!S.j1){S.j1=S.bidang;S.u1=S.univ||''}
+/* data double degree lama (j1/j2/u1/u2) digabung jadi satu kalimat */
+if(!S.dd&&(S.j2||S.u2))S.dd=`Double Degree ${S.j1||'Jurusan 1'} dan ${S.j2||'Jurusan 2'} ${S.u1||'Universitas 1'} dan ${S.u2||'Universitas 2'}`;
 const save=()=>{try{localStorage.setItem('pk288',JSON.stringify({...S,photo:null}))}catch(e){}};
 const WIN={1:[153,228,793,1078],2:[148,246,784,1060]};   // [left, top, lebar, tinggi] jendela foto: 1 = satu gelar, 2 = double degree
 function photoCss(){
@@ -43,6 +48,7 @@ const cur=p=>{if(p.k!=='sp')return p;const c=SEM[S.sem||8];return {...p,img:c.im
 const MS=document.createElement('div');MS.id='ms';document.body.append(MS);
 const fitsBox=(w,h)=>t=>{MS.className='bx';MS.style.cssText=`position:fixed;left:0;top:0;visibility:hidden;width:${w}px;height:${h}px;font-size:${MIN_BOX}px`;MS.textContent=t;return MS.scrollHeight<=MS.clientHeight+1};
 const fitsLine=(w,px,title)=>t=>{MS.className='';MS.style.cssText=`position:fixed;left:0;top:0;visibility:hidden;white-space:nowrap;overflow:hidden;width:${w}px;font-size:${px}px;font-family:${title?"var(--f-title)":"var(--f-body)"};font-weight:${title?"var(--w-title)":"400"}`;MS.textContent=title?t.toUpperCase():t;return MS.scrollWidth<=MS.clientWidth+1};
+const fitsWrap=(w,px,cls='wrap')=>t=>{MS.className=cls;MS.style.cssText=`position:fixed;left:0;top:0;visibility:hidden;width:${w}px;font-size:${px}px;font-family:var(--f-body);font-weight:400`;MS.textContent=t;return MS.scrollHeight<=MS.clientHeight+1};
 const LONG='Mengikuti perkuliahan, riset, dan kegiatan organisasi untuk mengembangkan kemampuan serta kontribusi bagi masyarakat. '.repeat(40);
 function limit(t,fits){if(fits(t))return t;let lo=0,hi=t.length;while(lo<hi){const m=(lo+hi+1)>>1;fits(t.slice(0,m))?lo=m:hi=m-1}return t.slice(0,lo)}
 const cap=fits=>limit(LONG,fits).length;
@@ -56,15 +62,35 @@ function pageHTML(p0){
   const p=cur(p0),bg=`<img class="bg" alt="" src="assets/${p.k==='tw'?(S.deg===2?'p1d.png':'p1.png'):p.img}">`;
   if(p.k==='tw'){
     const dd=S.deg===2,img=S.photo&&S.pw?`<img alt="" src="${S.photo}" style="${photoCss()}">`:'';
-    const ls=dd?[S.j1||'Jurusan 1',S.u1||'Universitas 1',S.j2||'Jurusan 2',S.u2||'Universitas 2']:[S.j1||'Bidang Pendidikan',S.u1||'Universitas'];
     const w=WIN[S.deg];
-    return `<div class="ph" style="left:${w[0]}px;top:${w[1]}px;width:${w[2]}px;height:${w[3]}px">${img}</div>${bg}<div class="pl${dd?' dd':''}"><div class="nm fit" data-fs="${dd?DD.name:46}" data-min="${dd?DD.minName:MIN_NAME}">${esc((S.name||'NAMA LENGKAP').toUpperCase())}</div>${ls.map(l=>`<div class="ln fit" data-fs="${dd?DD.line:25}" data-min="${dd?DD.minLine:MIN_LINE}">${esc(l)}</div>`).join('')}</div>`;
+    const lines=dd
+      ? [[S.dd||'',DD.text.fs,DD.text.min,3]]
+      : [[S.j1||'Bidang Pendidikan',FIELD.fs,FIELD.min,1],[S.u1||'Universitas',UNIV.fs,UNIV.min,0]];
+    const ls=lines.map(([t,fs,min,wrap])=>`<div class="ln fit${wrap===3?' wrap3':wrap?' wrap':''}" data-fs="${fs}" data-min="${min}">${esc(t)}</div>`).join('');
+    return `<div class="ph" style="left:${w[0]}px;top:${w[1]}px;width:${w[2]}px;height:${w[3]}px">${img}</div>${bg}<div class="pl${dd?' dd':''}"><div class="nm fit" data-fs="${dd?DD.name:46}" data-min="${dd?DD.minName:MIN_NAME}">${esc((S.name||'NAMA LENGKAP').toUpperCase())}</div>${ls}</div>`;
   }
   return bg+p.boxes.map(([l,k,x1,y1,x2,y2])=>`<div class="bx" style="left:${x1}px;top:${y1}px;width:${x2-x1}px;height:${y2-y1}px;color:${p.col}">${esc(S.t[p.k+k])}</div>`).join('');
 }
 function fit(){
   document.querySelectorAll('#page .bx').forEach(e=>{let f=MAX_BOX;e.style.fontSize=f+'px';while(e.scrollHeight>e.clientHeight+1&&f>MIN_BOX){f--;e.style.fontSize=f+'px'}});
-  document.querySelectorAll('#page .fit').forEach(e=>{let f=+e.dataset.fs;e.style.fontSize=f+'px';while(e.scrollWidth>e.clientWidth+1&&f>+e.dataset.min){f--;e.style.fontSize=f+'px'}});
+  document.querySelectorAll('#page .fit').forEach(e=>{
+    let f=+e.dataset.fs;e.style.fontSize=f+'px';
+    const wrapped=e.classList.contains('wrap')||e.classList.contains('wrap3');
+    while((wrapped?e.scrollHeight>e.clientHeight+1:e.scrollWidth>e.clientWidth+1)&&f>+e.dataset.min){f--;e.style.fontSize=f+'px'}
+  });
+  /* kalau total tinggi plat masih kelebihan, kecilkan semua teks bersamaan */
+  const pl=$('#page .pl');
+  if(pl){
+    let g=0;
+    while(pl.scrollHeight>pl.clientHeight+1&&g++<100){
+      let ok=false;
+      pl.querySelectorAll('.fit').forEach(e=>{
+        const f=parseFloat(e.style.fontSize)||+e.dataset.fs;
+        if(f>+e.dataset.min){e.style.fontSize=(f-1)+'px';ok=true}
+      });
+      if(!ok)break;
+    }
+  }
 }
 function scale(){
   const o=$('#out'),w=o.parentElement.clientWidth,s=Math.min(w/1080,Math.max(.3,(innerHeight-60)/1440));
@@ -84,13 +110,13 @@ function form(){
   const p=cur(PAGES[S.p]),f=$('#form');
   if(p.k==='tw'){
     const dd=S.deg===2,w=dd?W_DOUBLE:W_SINGLE;
-    const fl=dd?[['j1','Jurusan 1'],['u1','Universitas 1'],['j2','Jurusan 2'],['u2','Universitas 2']]:[['j1','Bidang pendidikan'],['u1','Universitas']];
+    const fl=dd?[['dd','Double degree']]:[['j1','Bidang pendidikan'],['u1','Universitas']];
     f.innerHTML=DEGCH(S.deg)+`<label for="ph">Foto kamu</label><input type="file" id="ph" accept="image/*,.heic,.heif"><p class="note" id="st" role="status"></p>
     <label for="zm">Zoom</label><input type="range" id="zm" min="1" max="3" step="0.05" value="${S.zoom}">
     <label for="ox">Geser kiri-kanan</label><input type="range" id="ox" min="-1" max="1" step="0.01" value="${S.ox}">
     <label for="oy">Geser atas-bawah</label><input type="range" id="oy" min="-1" max="1" step="0.01" value="${S.oy}">
     <label for="f_name">Nama lengkap <small class="cnt" id="c_name"></small></label><input type="text" id="f_name" value="${esc(S.name)}" autocomplete="off">`+
-    fl.map(([k,l])=>`<label for="f_${k}">${l} <small class="cnt" id="c_${k}"></small></label><input type="text" id="f_${k}" value="${esc(S[k])}" autocomplete="off">`).join('');
+    fl.map(([k,l])=>`<label for="f_${k}">${l} <small class="cnt" id="c_${k}"></small></label><input type="text" id="f_${k}" value="${esc(S[k])}"${k==='dd'?' placeholder="Double Degree Jurusan 1 Jurusan 2 Universitas 1 Universitas 2"':''} autocomplete="off">`).join('');
     $('#ph').onchange=async e=>{
       const f=e.target.files[0],st=$('#st');if(!f)return;
       try{
@@ -107,8 +133,15 @@ function form(){
       }catch(err){st.textContent='Foto tidak bisa dibaca. Simpan sebagai JPG atau PNG, lalu coba lagi.'}
     };
     [['zm','zoom'],['ox','ox'],['oy','oy']].forEach(([id,k])=>$('#'+id).oninput=e=>{S[k]=+e.target.value;save();render()});
-    const nf=fitsLine(w,dd?DD.minName:MIN_NAME,true);bindLimited($('#f_name'),nf,0,v=>S.name=v,$('#c_name'),cap(nf));
-    const lf=fitsLine(w,dd?DD.minLine:MIN_LINE,false);fl.forEach(([k])=>bindLimited($('#f_'+k),lf,0,v=>S[k]=v,$('#c_'+k),cap(lf)));
+    const nf=fitsLine(w,dd?DD.minName:MIN_NAME,true);
+    S.name=limit(S.name||'',nf);$('#f_name').value=S.name;
+    bindLimited($('#f_name'),nf,0,v=>S.name=v,$('#c_name'),cap(nf));
+    fl.forEach(([k])=>{
+      const j=k[0]==='j';
+      const lf=dd?fitsWrap(w,DD.text.min,'wrap3'):j?fitsWrap(w,FIELD.min):fitsLine(w,UNIV.min,false);
+      S[k]=limit(S[k]||'',lf);$('#f_'+k).value=S[k];
+      bindLimited($('#f_'+k),lf,0,v=>S[k]=v,$('#c_'+k),cap(lf));
+    });
   }else if(!p.boxes.length){
     f.innerHTML='<p class="note">Halaman sampul tidak perlu diisi. Tetap ikut terunduh di "Unduh semua halaman".</p>';
   }else{

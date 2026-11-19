@@ -36,11 +36,15 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 .ph{position:absolute;left:144px;top:246px;width:788px;height:1060px;overflow:hidden;background:linear-gradient(#bfe6fb,#eaf7fd)}
 .ph img{position:absolute;max-width:none;display:block}
 .bx{position:absolute;z-index:3;padding:22px 26px;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.35}
-.pl{position:absolute;z-index:3;left:42px;top:1008px;width:470px;color:#7a1c22}
+.pl{position:absolute;z-index:3;left:42px;top:1010px;width:470px;height:135px;overflow:hidden;color:#7a1c22}
 .pl div{white-space:nowrap;overflow:hidden;font-family:var(--f-body)}
-.pl.dd{left:32px;top:958px;width:548px}
+.pl.dd{left:32px;top:970px;width:548px;height:170px}
+.pl.dd .nm{margin-bottom:2px}
 .pl div.nm{font-family:var(--f-title);font-weight:400;line-height:1.1}
 .pl .ln{line-height:1.2}
+.pl div.wrap,#ms.wrap,.pl div.wrap3,#ms.wrap3{white-space:normal;overflow-wrap:break-word;line-height:1.1;overflow:hidden}
+.pl div.wrap,#ms.wrap{max-height:2.2em}
+.pl div.wrap3,#ms.wrap3{max-height:3.3em}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{font:inherit;font-size:14px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
 .chips button[aria-pressed="true"]{background:var(--acc);color:var(--on);border-color:var(--acc)}
