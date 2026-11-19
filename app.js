@@ -17,8 +17,8 @@ const W_SINGLE=470, W_DOUBLE=548;   // lebar area teks di plat nama
 
 /* Satu gelar: bidang pendidikan sampai 2 baris.
    Double degree: 1 kalimat lengkap, maksimal 3 baris. */
-const FIELD={fs:24,min:18}, UNIV={fs:24,min:18};
-const DD={name:40,minName:30,text:{fs:26,min:18}};
+const FIELD={fs:22,min:18}, UNIV={fs:22,min:18};
+const DD={name:40,minName:30,text:{fs:22,min:18}};
 
 const D='#fbf1de',L='#7a1c22';
 const SEM={
@@ -28,7 +28,8 @@ const SEM={
  3:{img:'p3_3.png',lab:['Semester 1','Semester 2','Semester 3'],b:[[70,312,502,691],[561,381,993,761],[321,847,752,1227]]},
  4:{img:'p3_4.png',lab:['Semester 1','Semester 2','Semester 3','Semester 4'],b:[[70,317,502,697],[559,374,991,754],[70,839,502,1219],[561,880,993,1260]]},
  6:{img:'p3_6.png',lab:['Semester 1-2','Semester 3-4','Semester 5-6'],b:[[70,317,502,697],[559,363,991,743],[340,847,772,1227]]},
- 8:{img:'p3.png',lab:['Semester 1-2','Semester 3-4','Semester 5-6','Semester 7-8'],b:[[69,316,502,697],[558,372,992,754],[69,838,502,1219],[560,879,994,1260]]}};
+ 8:{img:'p3.png',lab:['Semester 1-2','Semester 3-4','Semester 5-6','Semester 7-8'],b:[[69,316,502,697],[558,372,992,754],[69,838,502,1219],[560,879,994,1260]]},
+ spesialis:{img:'p3_spesialis.png',lab:['Semester 1','Semester 2','Semester 3','Semester 4'],b:[[70,306,1004,458],[70,540,1004,694],[70,774,1004,926],[70,1028,1004,1180]]}};
 const LM={2026:{img:'p4.png',lab:['2026-2031','2031-2036','2036-2041','2041-Beyond']},
  2027:{img:'p4_2027.png',lab:['2027-2032','2032-2037','2037-2042','2042-Beyond']}};
 const PAGES=[
@@ -68,7 +69,7 @@ const cap=fits=>limit(LONG,fits).length;
 
 /* ===== halaman ===== */
 const chips=(n,label,opts,v)=>`<label>${label}</label><div class="chips" data-n="${n}">${opts.map(([o,t])=>`<button type="button" data-v="${o}" aria-pressed="${String(o)===String(v)}">${t}</button>`).join('')}</div>`;
-const SEMCH=(v)=>chips('sem','Jumlah semester / program',[[1,'Fellowship 6 bulan'],[12,'Fellowship 12 bulan'],[2,'2'],[3,'3'],[4,'4'],[6,'6'],[8,'8']],v);
+const SEMCH=(v)=>chips('sem','Jumlah semester / program',[[1,'Fellowship 6 bulan'],[12,'Fellowship 12 bulan'],['spesialis','Spesialis'],[2,'2'],[3,'3'],[4,'4'],[6,'6'],[8,'8']],v);
 const YRCH=(v)=>chips('yr','Mulai tahun',[[2026,'2026'],[2027,'2027']],v);
 const DEGCH=(v)=>chips('deg','Gelar',[[1,'Satu gelar'],[2,'Double degree']],v);
 
@@ -180,7 +181,7 @@ function dlgBody(){$('#dlgBody').innerHTML='<p class="note">Pilih gelar dulu. Ju
 function openCfg(){dlgBody();dlg.showModal()}
 document.addEventListener('click',e=>{
   const b=e.target.closest('.chips button');if(!b)return;
-  const n=b.parentElement.dataset.n;S[n]=+b.dataset.v;if(n==='deg')S.ready=true;save();
+  const n=b.parentElement.dataset.n,v=b.dataset.v;S[n]=/^-?\d+$/.test(v)?+v:v;if(n==='deg')S.ready=true;save();
   if(dlg.hasAttribute('open'))dlgBody();else{form();render()}
 });
 $('#dlgOk').onclick=()=>{dlg.close();form();render()};
