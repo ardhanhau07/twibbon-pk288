@@ -10,7 +10,7 @@
 *{box-sizing:border-box}
 button,input,textarea{font-family:var(--f-body)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body)}
-.app{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:24px;padding:20px;max-width:1300px;margin:auto}
+.app{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:24px;padding:5px;max-width:1300px;margin:auto}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;align-self:start}
 h1{font-family:var(--f-title);font-weight:var(--w-title);font-size:28px;line-height:1.1;letter-spacing:.5px;margin:0 0 4px;color:var(--acc)}
 .sub{margin:0 0 14px;font-size:14px;opacity:.8}
