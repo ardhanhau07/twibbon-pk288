@@ -29,8 +29,9 @@ const S={p:0,sem:null,deg:1,t:{},name:'',j1:'',u1:'',j2:'',u2:'',photo:null,zoom
 try{Object.assign(S,JSON.parse(localStorage.getItem('pk288')||'{}'));S.photo=null}catch(e){}
 if(S.bidang&&!S.j1){S.j1=S.bidang;S.u1=S.univ||''}
 const save=()=>{try{localStorage.setItem('pk288',JSON.stringify({...S,photo:null}))}catch(e){}};
-const PW=784,PH=1060;   // ukuran jendela foto
+const WIN={1:[153,228,793,1078],2:[148,246,784,1060]};   // [left, top, lebar, tinggi] jendela foto: 1 = satu gelar, 2 = double degree
 function photoCss(){
+  const [,,PW,PH]=WIN[S.deg];
   const s0=Math.max(PW/S.pw,PH/S.ph),k=s0*S.zoom,dw=S.pw*k,dh=S.ph*k;
   const cl=v=>Math.max(-1,Math.min(1,v||0));
   return `width:${dw}px;height:${dh}px;left:${(PW-dw)/2+cl(S.ox)*(dw-PW)/2}px;top:${(PH-dh)/2+cl(S.oy)*(dh-PH)/2}px`;
@@ -56,7 +57,8 @@ function pageHTML(p0){
   if(p.k==='tw'){
     const dd=S.deg===2,img=S.photo&&S.pw?`<img alt="" src="${S.photo}" style="${photoCss()}">`:'';
     const ls=dd?[S.j1||'Jurusan 1',S.u1||'Universitas 1',S.j2||'Jurusan 2',S.u2||'Universitas 2']:[S.j1||'Bidang Pendidikan',S.u1||'Universitas'];
-    return `<div class="ph">${img}</div>${bg}<div class="pl${dd?' dd':''}"><div class="nm fit" data-fs="${dd?DD.name:46}" data-min="${dd?DD.minName:MIN_NAME}">${esc((S.name||'NAMA LENGKAP').toUpperCase())}</div>${ls.map(l=>`<div class="ln fit" data-fs="${dd?DD.line:25}" data-min="${dd?DD.minLine:MIN_LINE}">${esc(l)}</div>`).join('')}</div>`;
+    const w=WIN[S.deg];
+    return `<div class="ph" style="left:${w[0]}px;top:${w[1]}px;width:${w[2]}px;height:${w[3]}px">${img}</div>${bg}<div class="pl${dd?' dd':''}"><div class="nm fit" data-fs="${dd?DD.name:46}" data-min="${dd?DD.minName:MIN_NAME}">${esc((S.name||'NAMA LENGKAP').toUpperCase())}</div>${ls.map(l=>`<div class="ln fit" data-fs="${dd?DD.line:25}" data-min="${dd?DD.minLine:MIN_LINE}">${esc(l)}</div>`).join('')}</div>`;
   }
   return bg+p.boxes.map(([l,k,x1,y1,x2,y2])=>`<div class="bx" style="left:${x1}px;top:${y1}px;width:${x2-x1}px;height:${y2-y1}px;color:${p.col}">${esc(S.t[p.k+k])}</div>`).join('');
 }
@@ -101,7 +103,7 @@ function form(){
         const im=new Image();im.src=url;await im.decode();
         S.photo=url;S.pw=im.naturalWidth;S.ph=im.naturalHeight;S.zoom=1;S.ox=0;S.oy=0;
         $('#zm').value=1;$('#ox').value=0;$('#oy').value=0;
-        st.textContent=Math.max(PW/S.pw,PH/S.ph)>1.3?`Foto ${S.pw}×${S.ph} terlalu kecil untuk jendela potret, hasil bisa buram. Pakai foto potret (mis. 3:4) minimal ±800×1060.`:'';render();
+        st.textContent=Math.max(WIN[S.deg][2]/S.pw,WIN[S.deg][3]/S.ph)>1.3?`Foto ${S.pw}×${S.ph} terlalu kecil untuk jendela potret, hasil bisa buram. Pakai foto potret (mis. 3:4) minimal ±800×1060.`:'';render();
       }catch(err){st.textContent='Foto tidak bisa dibaca. Simpan sebagai JPG atau PNG, lalu coba lagi.'}
     };
     [['zm','zoom'],['ox','ox'],['oy','oy']].forEach(([id,k])=>$('#'+id).oninput=e=>{S[k]=+e.target.value;save();render()});
