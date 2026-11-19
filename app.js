@@ -18,15 +18,18 @@ const W_SINGLE=470, W_DOUBLE=548;   // lebar area teks di plat nama
 /* Satu gelar: bidang pendidikan sampai 2 baris.
    Double degree: 1 kalimat lengkap, maksimal 3 baris. */
 const FIELD={fs:22,min:18}, UNIV={fs:22,min:18};
-const DD={name:40,minName:30,text:{fs:22,min:18}};
+const DD={name:40,minName:30,text:{fs:26,min:18}};
 
 const D='#fbf1de',L='#7a1c22';
 const SEM={
+ 1:{img:'p3_f.png',lab:['6 Bulan'],b:[[70,361,1004,1045]]},   // fellowship 6 bulan
  2:{img:'p3_2.png',lab:['Semester 1','Semester 2'],b:[[70,432,502,812],[561,501,993,881]]},
  3:{img:'p3_3.png',lab:['Semester 1','Semester 2','Semester 3'],b:[[70,312,502,691],[561,381,993,761],[321,847,752,1227]]},
  4:{img:'p3_4.png',lab:['Semester 1','Semester 2','Semester 3','Semester 4'],b:[[70,317,502,697],[559,374,991,754],[70,839,502,1219],[561,880,993,1260]]},
  6:{img:'p3_6.png',lab:['Semester 1-2','Semester 3-4','Semester 5-6'],b:[[70,317,502,697],[559,363,991,743],[340,847,772,1227]]},
  8:{img:'p3.png',lab:['Semester 1-2','Semester 3-4','Semester 5-6','Semester 7-8'],b:[[69,316,502,697],[558,372,992,754],[69,838,502,1219],[560,879,994,1260]]}};
+const LM={2026:{img:'p4.png',lab:['2026-2031','2031-2036','2036-2041','2041-Beyond']},
+ 2027:{img:'p4_2027.png',lab:['2027-2032','2032-2037','2037-2042','2042-Beyond']}};
 const PAGES=[
  {t:'Twibbon',k:'tw'},
  {t:'Potensi diri',k:'ps',img:'p2.png',col:D,boxes:[['Personal Strengths','a',66,412,531,765],['Academic Expertise','b',571,405,1025,760],['Meaningful Experiences','c',56,862,531,1215],['Areas for Development','d',555,858,1025,1210]]},
@@ -34,7 +37,7 @@ const PAGES=[
  {t:'Life grand map',k:'lm',img:'p4.png',col:D,boxes:[['2026-2031','a',51,347,483,630],['2031-2036','b',626,480,1046,756],['2036-2041','c',46,772,484,1060],['2041-Beyond','d',626,923,1059,1209]]},
  {t:'Community & goals',k:'cg',img:'p5.png',col:L,boxes:[['Community Services','a',74,407,1003,680],['Grand Goals Plan','b',74,795,1003,1053]]},
  {t:'Sampul',k:'cv',img:'p6.png',boxes:[]}];
-const S={p:0,sem:null,deg:1,ready:false,t:{},name:'',j1:'',u1:'',j2:'',u2:'',dd:'',photo:null,zoom:1,ox:0,oy:0};
+const S={p:0,sem:null,yr:2026,deg:1,ready:false,t:{},name:'',j1:'',u1:'',j2:'',u2:'',dd:'',photo:null,zoom:1,ox:0,oy:0};
 try{Object.assign(S,JSON.parse(localStorage.getItem('pk288')||'{}'));S.photo=null}catch(e){}
 if(S.bidang&&!S.j1){S.j1=S.bidang;S.u1=S.univ||''}
 /* data double degree lama (j1/j2/u1/u2) digabung jadi satu kalimat */
@@ -49,7 +52,9 @@ function photoCss(){
   return `width:${dw}px;height:${dh}px;left:${(PW-dw)/2+cl(S.ox)*(dw-PW)/2}px;top:${(PH-dh)/2+cl(S.oy)*(dh-PH)/2}px`;
 }
 if(Math.abs(S.ox)>1||Math.abs(S.oy)>1){S.ox=0;S.oy=0}
-const cur=p=>{if(p.k!=='sp')return p;const c=SEM[S.sem||8];return {...p,img:c.img,boxes:c.b.map((b,i)=>[c.lab[i],`${S.sem||8}_${i}`,...b])}};
+const cur=p=>{
+  if(p.k==='lm'){const c=LM[S.yr]||LM[2026];return {...p,img:c.img,boxes:p.boxes.map((b,i)=>[c.lab[i],...b.slice(1)])}}
+  if(p.k!=='sp')return p;const c=SEM[S.sem||8];return {...p,img:c.img,boxes:c.b.map((b,i)=>[c.lab[i],`${S.sem||8}_${i}`,...b])}};
 
 /* ===== pengukur: apakah teks masih muat pada ukuran font minimum? ===== */
 const MS=document.createElement('div');MS.id='ms';document.body.append(MS);
@@ -62,7 +67,8 @@ const cap=fits=>limit(LONG,fits).length;
 
 /* ===== halaman ===== */
 const chips=(n,label,opts,v)=>`<label>${label}</label><div class="chips" data-n="${n}">${opts.map(([o,t])=>`<button type="button" data-v="${o}" aria-pressed="${String(o)===String(v)}">${t}</button>`).join('')}</div>`;
-const SEMCH=(v)=>chips('sem','Jumlah semester',[[2,'2'],[3,'3'],[4,'4'],[6,'6'],[8,'8']],v);
+const SEMCH=(v)=>chips('sem','Jumlah semester / program',[[1,'Fellowship 6 bulan'],[2,'2'],[3,'3'],[4,'4'],[6,'6'],[8,'8']],v);
+const YRCH=(v)=>chips('yr','Mulai tahun',[[2026,'2026'],[2027,'2027']],v);
 const DEGCH=(v)=>chips('deg','Gelar',[[1,'Satu gelar'],[2,'Double degree']],v);
 
 function pageHTML(p0){
@@ -157,7 +163,7 @@ function form(){
   }else if(!p.boxes.length){
     f.innerHTML='<p class="note">Halaman sampul tidak perlu diisi. Tetap ikut terunduh di "Unduh semua halaman".</p>';
   }else{
-    f.innerHTML=(p.k==='sp'?SEMCH(S.sem||8):'')+p.boxes.map(([l,k])=>`<label for="f_${p.k}${k}">${l} <small class="cnt" id="c_${p.k}${k}"></small></label><textarea id="f_${p.k}${k}"></textarea>`).join('');
+    f.innerHTML=(p.k==='sp'?SEMCH(S.sem||8):'')+(p.k==='lm'?YRCH(S.yr):'')+p.boxes.map(([l,k])=>`<label for="f_${p.k}${k}">${l} <small class="cnt" id="c_${p.k}${k}"></small></label><textarea id="f_${p.k}${k}"></textarea>`).join('');
     p.boxes.forEach(([l,k,x1,y1,x2,y2])=>{
       const key=p.k+k,el=$('#f_'+key),fb=fitsBox(x2-x1,y2-y1);
       el.value=lim(S.t[key]||'',fb);S.t[key]=el.value;
