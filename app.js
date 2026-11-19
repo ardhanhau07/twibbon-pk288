@@ -17,12 +17,13 @@ const W_SINGLE=470, W_DOUBLE=548;   // lebar area teks di plat nama
 
 /* Satu gelar: bidang pendidikan sampai 2 baris.
    Double degree: 1 kalimat lengkap, maksimal 3 baris. */
-const FIELD={fs:22,min:18}, UNIV={fs:22,min:18};
+const FIELD={fs:24,min:18}, UNIV={fs:24,min:18};
 const DD={name:40,minName:30,text:{fs:26,min:18}};
 
 const D='#fbf1de',L='#7a1c22';
 const SEM={
  1:{img:'p3_f.png',lab:['6 Bulan'],b:[[70,361,1004,1045]]},   // fellowship 6 bulan
+ 12:{img:'p3_f12.png',lab:['12 Bulan'],b:[[70,361,1004,1045]]},   // fellowship 12 bulan
  2:{img:'p3_2.png',lab:['Semester 1','Semester 2'],b:[[70,432,502,812],[561,501,993,881]]},
  3:{img:'p3_3.png',lab:['Semester 1','Semester 2','Semester 3'],b:[[70,312,502,691],[561,381,993,761],[321,847,752,1227]]},
  4:{img:'p3_4.png',lab:['Semester 1','Semester 2','Semester 3','Semester 4'],b:[[70,317,502,697],[559,374,991,754],[70,839,502,1219],[561,880,993,1260]]},
@@ -67,7 +68,7 @@ const cap=fits=>limit(LONG,fits).length;
 
 /* ===== halaman ===== */
 const chips=(n,label,opts,v)=>`<label>${label}</label><div class="chips" data-n="${n}">${opts.map(([o,t])=>`<button type="button" data-v="${o}" aria-pressed="${String(o)===String(v)}">${t}</button>`).join('')}</div>`;
-const SEMCH=(v)=>chips('sem','Jumlah semester / program',[[1,'Fellowship 6 bulan'],[2,'2'],[3,'3'],[4,'4'],[6,'6'],[8,'8']],v);
+const SEMCH=(v)=>chips('sem','Jumlah semester / program',[[1,'Fellowship 6 bulan'],[12,'Fellowship 12 bulan'],[2,'2'],[3,'3'],[4,'4'],[6,'6'],[8,'8']],v);
 const YRCH=(v)=>chips('yr','Mulai tahun',[[2026,'2026'],[2027,'2027']],v);
 const DEGCH=(v)=>chips('deg','Gelar',[[1,'Satu gelar'],[2,'Double degree']],v);
 
